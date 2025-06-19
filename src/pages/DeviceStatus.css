@@ -1,0 +1,272 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.mqtt-container {
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.logo-wrapper {
+  margin-bottom: 1.2rem;
+}
+
+.logo {
+  max-width: 250px;
+  height: auto;
+}
+
+.mqtt-card {
+  width: 100%;
+  max-width: 460px;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.mqtt-header {
+  background-color: #581845;
+  padding: 1.5rem;
+  color: white;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.connection-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.connected {
+  color: #10b981;
+}
+
+.disconnected {
+  color: #ef4444;
+}
+
+.connecting {
+  color: #f59e0b;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-text.connected {
+  color: #10b981;
+}
+
+.status-text.disconnected {
+  color: #ef4444;
+}
+
+.status-text.connecting {
+  color: #f59e0b;
+}
+
+.mqtt-content {
+  padding: 1.5rem;
+}
+
+.status-card {
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.status-card.on {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-card.off {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.status-card.no-response,
+.status-card.idle {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.status-card.checking {
+  background-color: rgba(255, 87, 51, 0.1);
+  color: #ff5733;
+}
+
+.status-icon {
+  margin-bottom: 1rem;
+}
+
+.status-icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.status-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.status-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.check-button {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  background-color: #ff5733;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.check-button:hover:not(.disabled) {
+  background-color: #cc4629;
+}
+
+.check-button.checking,
+.check-button.disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.check-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.connection-info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.connection-info h3 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.info-label {
+  color: #6b7280;
+}
+
+.info-value {
+  color: #111827;
+  font-family: monospace;
+  overflow-wrap: break-word;
+}
+
+.mqtt-footer {
+  padding: 0.75rem 1.5rem;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.mqtt-footer p {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 480px) {
+  .mqtt-card {
+    max-width: 100%;
+    margin: 0 1rem;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+  }
+
+  .check-button {
+    font-size: 0.875rem;
+  }
+}
