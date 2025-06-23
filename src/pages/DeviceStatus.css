@@ -211,6 +211,7 @@ h1 {
   color: #111827;
   font-family: monospace;
   overflow-wrap: break-word;
+  margin-top: 1%;
 }
 
 .mqtt-footer {

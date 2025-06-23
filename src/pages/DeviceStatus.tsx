@@ -1,90 +1,53 @@
 //@ts-nocheck
-import { useEffect, useRef, useState } from "react";
-import mqtt from "mqtt";
+import { useEffect, useState } from "react";
 import { Power, Loader2, Wifi, WifiOff, Server, Zap } from "lucide-react";
 import logo from "../assets/logo.png";
-import './DeviceStatus.css'
+import './DeviceStatus.css';
 
-const MQTT_BROKER_URL = import.meta.env.VITE_MQTT_BROKER_URL!;
-const TOPIC = import.meta.env.VITE_MQTT_TOPIC!;
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL!;
+const DEVICE_ID = "GS2526002";
 
 const MqttStatus = () => {
   const [status, setStatus] = useState<"ON" | "OFF" | "No Response" | "Idle" | "Checking...">("Idle");
-  const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "connecting">("disconnected");
+  const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "connecting">("connected");
   const [checking, setChecking] = useState(false);
-  const clientRef = useRef<any>(null);
-  const timeoutRef = useRef<any>(null);
+  const [lastChecked, setLastChecked] = useState<string | null>(null);
+  const [lastPing, setLastPing] = useState<string | null>(null);
 
-  useEffect(() => {
-    setConnectionStatus("connecting");
-
-    const client = mqtt.connect(MQTT_BROKER_URL, {
-      keepalive: 60, // keep alive with ping every 60s
-      reconnectPeriod: 5000, // try to reconnect every 5s forever
-      connectTimeout: 30 * 1000, // timeout after 30s if cannot connect
-    });
-
-    clientRef.current = client;
-
-    client.on("connect", () => {
-      console.log("MQTT Connected");
-      setConnectionStatus("connected");
-      client.subscribe(TOPIC);
-    });
-
-    client.on("reconnect", () => {
-      console.log("Reconnecting to MQTT...");
-      setConnectionStatus("connecting");
-    });
-
-    client.on("offline", () => {
-      console.warn("MQTT is offline. Retrying...");
-      setConnectionStatus("connecting"); // Treat as reconnecting
-    });
-
-    client.on("error", (err) => {
-      console.error("MQTT Error:", err?.message || err);
-      setConnectionStatus("disconnected");
-    });
-
-    client.on("close", () => {
-      console.log("Connection closed. Will retry...");
-      // Don't setConnectionStatus here, keep retrying silently
-    });
-
-    return () => client.end();
-  }, []);
-
-
-
-  const handleCheckStatus = () => {
-    if (connectionStatus !== "connected") return;
+  const checkDeviceStatus = async () => {
     setChecking(true);
     setStatus("Checking...");
-    let foundStatus = false;
 
-    const messageHandler = (topic: string, message: Buffer) => {
-      if (topic === "test_OUT") {
-        foundStatus = true;
-        const payload = message.toString().trim();
-        setStatus(payload === "1" ? "ON" : "OFF");
-        setChecking(false); 
-        clientRef.current?.off("message", messageHandler);
-        clearTimeout(timeoutRef.current); 
+    try {
+      const response = await fetch(`${API_BASE_URL}/devices/${DEVICE_ID}`);
+      if (!response.ok) {
+        setStatus("No Response");
+        setLastPing(null);
+      } else {
+        const data = await response.json();
+        setStatus(data?.online ? "ON" : "OFF");
+        setLastPing(new Date(data?.last_ping).toLocaleString());
       }
-    };
+    } catch (err) {
+      console.error("API error:", err);
+      setStatus("No Response");
+      setLastPing(null);
+    }
 
-
-    clientRef.current?.on("message", messageHandler);
-    clientRef.current?.publish("test_IN", "status");
-
-    timeoutRef.current = setTimeout(() => {
-      clientRef.current?.off("message", messageHandler);
-      if (!foundStatus) setStatus("No Response");
-      setChecking(false);
-    }, 5000);
+    setLastChecked(new Date().toLocaleTimeString());
+    setChecking(false);
   };
+
+  // ✅ Fetch once on load + every 5 seconds
+  useEffect(() => {
+    checkDeviceStatus(); // Initial fetch
+
+    const interval = setInterval(() => {
+      checkDeviceStatus();
+    }, 5000); // 5000ms = 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
   return (
     <div className="mqtt-container">
@@ -108,7 +71,7 @@ const MqttStatus = () => {
               </span>
             </div>
           </div>
-          <p className="header-subtitle">MQTT IoT Device Status Monitor</p>
+          <p className="header-subtitle">API IoT Device Status Monitor</p>
         </div>
 
         {/* Status Card */}
@@ -132,9 +95,9 @@ const MqttStatus = () => {
           </div>
 
           <button
-            onClick={handleCheckStatus}
-            disabled={checking || connectionStatus !== "connected"}
-            className={`check-button ${checking ? "checking" : ""} ${connectionStatus !== "connected" ? "disabled" : ""}`}
+            onClick={checkDeviceStatus}
+            disabled={checking}
+            className={`check-button ${checking ? "checking" : ""}`}
           >
             {checking ? (
               <>
@@ -152,16 +115,16 @@ const MqttStatus = () => {
           <div className="connection-info">
             <h3>Connection Info</h3>
             <div className="info-grid">
-              <div className="info-label">Device Name:</div>
-              <div className="info-value">Device 001</div>
               <div className="info-label">Device ID:</div>
-              <div className="info-value">DEV2501</div>
+              <div className="info-value">{DEVICE_ID}</div>
+              <div className="info-label">Last Ping:</div>
+              <div className="info-value">{lastPing || "—"}</div>
             </div>
           </div>
         </div>
 
         <div className="mqtt-footer">
-          <p>Last checked: {new Date().toLocaleTimeString()}</p>
+          <p>Last checked: {lastChecked || "Not yet checked"}</p>
         </div>
       </div>
     </div>
